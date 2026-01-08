@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Student Attendance System</title>
+    <link rel="stylesheet" href="style.css">
+</head>
+<body>
+    <!-- Header -->
+    <header>
+        <h1>📚 Student Attendance System</h1>
+        <p>Manage students and track attendance efficiently</p>
+    </header>
+
+    <!-- Navigation Tabs -->
+    <div class="nav-tabs">
+        <button class="tab-btn active" data-tab="dashboard">Dashboard</button>
+        <button class="tab-btn" data-tab="students">Students</button>
+        <button class="tab-btn" data-tab="attendance">Attendance</button>
+    </div>
+
+    <!-- Main Container -->
+    <div class="container">
+        <!-- Alert Container -->
+        <div id="alertContainer"></div>
+
+        <!-- Dashboard Tab -->
+        <div id="dashboard" class="tab-content active">
+            <div class="stats-grid" id="statsGrid">
+                <!-- Stats will be dynamically loaded -->
+            </div>
+
+            <h2 style="margin-bottom: 1rem; color: var(--text-primary);">Today's Attendance Summary</h2>
+            <div class="table-container">
+                <table id="summaryTable">
+                    <thead>
+                        <tr>
+                            <th>Section</th>
+                            <th>Total Students</th>
+                            <th>Present</th>
+                            <th>Absent</th>
+                            <th>Late</th>
+                            <th>Not Marked</th>
+                        </tr>
+                    </thead>
+                    <tbody id="summaryTableBody">
+                        <!-- Data will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+
+        <!-- Students Tab -->
+        <div id="students" class="tab-content">
+            <div class="control-bar">
+                <div class="search-filter">
+                    <input type="text" id="studentSearch" placeholder="Search students...">
+                    <select id="sectionFilter">
+                        <option value="">All Sections</option>
+                    </select>
+                </div>
+                <button class="btn btn-primary" onclick="openAddStudentModal()">
+                    ➕ Add Student
+                </button>
+            </div>
+
+            <div class="cards-grid" id="studentsGrid">
+                <!-- Student cards will be loaded here -->
+            </div>
+        </div>
+
+        <!-- Attendance Tab -->
+        <div id="attendance" class="tab-content">
+            <div class="control-bar">
+                <div class="search-filter">
+                    <input type="date" id="attendanceDate" value="">
+                    <button class="btn btn-primary" onclick="loadAttendanceByDate()">
+                        🔍 View Attendance
+                    </button>
+                </div>
+                <div style="display: flex; gap: 0.5rem;">
+                    <button class="btn btn-success btn-sm" onclick="bulkMarkAttendance('present')">
+                        ✓ Mark All Present
+                    </button>
+                    <button class="btn btn-danger btn-sm" onclick="bulkMarkAttendance('absent')">
+                        ✗ Mark All Absent
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-container">
+                <table id="attendanceTable">
+                    <thead>
+                        <tr>
+                            <th>Student ID</th>
+                            <th>Name</th>
+                            <th>Section</th>
+                            <th>Status</th>
+                            <th>Actions</th>
+                        </tr>
+                    </thead>
+                    <tbody id="attendanceTableBody">
+                        <!-- Data will be loaded dynamically -->
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+
+    <!-- Add/Edit Student Modal -->
+    <div id="studentModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2 id="studentModalTitle">Add New Student</h2>
+                <button class="close-btn" onclick="closeModal('studentModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="studentForm" onsubmit="event.preventDefault(); saveStudent();">
+                    <div class="form-group">
+                        <label>Student ID *</label>
+                        <input type="text" id="studentId" placeholder="00000-00-0000" pattern="\d{5}-\d{2}-\d{4}" required>
+                        <div class="form-hint">Format: 00000-00-0000</div>
+                    </div>
+                    <div class="form-group">
+                        <label>First Name *</label>
+                        <input type="text" id="firstName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Last Name *</label>
+                        <input type="text" id="lastName" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Section *</label>
+                        <select id="studentSection" required>
+                            <option value="">Select Section</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('studentModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveStudent()">Save Student</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Mark Attendance Modal -->
+    <div id="attendanceModal" class="modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>Mark Attendance</h2>
+                <button class="close-btn" onclick="closeModal('attendanceModal')">&times;</button>
+            </div>
+            <div class="modal-body">
+                <form id="attendanceForm" onsubmit="event.preventDefault(); saveAttendance();">
+                    <input type="hidden" id="attendanceStudentId">
+                    <div class="form-group">
+                        <label>Student</label>
+                        <input type="text" id="attendanceStudentName" readonly>
+                    </div>
+                    <div class="form-group">
+                        <label>Date *</label>
+                        <input type="date" id="attendanceDateInput" required>
+                    </div>
+                    <div class="form-group">
+                        <label>Status *</label>
+                        <select id="attendanceStatus" required>
+                            <option value="">Select Status</option>
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="late">Late</option>
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Notes</label>
+                        <textarea id="attendanceNotes" placeholder="Optional notes..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" onclick="closeModal('attendanceModal')">Cancel</button>
+                <button class="btn btn-primary" onclick="saveAttendance()">Save Attendance</button>
+            </div>
+        </div>
+    </div>
+
+    <script src="script.js"></script>
+</body>
+</html>
